@@ -1,7 +1,15 @@
 import express, { type Express, type Request, type Response } from "express";
 
-const app: Express = express();
 const PORT = 3001;
+
+const app: Express = express();
+app.use(express.json());
+
+type PersonRecord = {
+  id: string;
+  name: string;
+  number: string;
+};
 
 let persons = [
   {
@@ -24,7 +32,7 @@ let persons = [
     name: "Mary Poppendieck",
     number: "39-23-6423122",
   },
-];
+] as PersonRecord[];
 
 app.get("/", (req: Request, res: Response) => {
   res.send("/");
@@ -60,6 +68,22 @@ app.delete("/api/persons/:id", (req: Request, res: Response) => {
     persons = newPersons;
     res.status(204).end();
   }
+});
+
+app.post("/api/persons", (req: Request, res: Response) => {
+  const p = req.body;
+
+  const newPersonRecord = {
+    name: p.name,
+    number: p.number,
+  } as PersonRecord;
+
+  let max = Math.max(...persons.map((p) => Number(p.id)));
+  newPersonRecord.id = String(++max);
+  persons.push(newPersonRecord);
+
+  console.log(persons);
+  res.status(201).end();
 });
 
 app.get("/info", (req: Request, res: Response) => {
