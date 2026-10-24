@@ -3,7 +3,7 @@ import express, { type Express, type Request, type Response } from "express";
 const app: Express = express();
 const PORT = 3001;
 
-const persons = [
+let persons = [
   {
     id: "1",
     name: "Arto Hellas",
@@ -33,6 +33,33 @@ app.get("/", (req: Request, res: Response) => {
 app.get("/api/persons", (req: Request, res: Response) => {
   console.log("GET persons");
   res.status(200).json(persons);
+});
+
+app.get("/api/persons/:id", (req: Request, res: Response) => {
+  const id = req.params.id;
+  console.log(`GET persons:id=${id}`);
+
+  const personFound = persons.find((person) => person.id === id);
+
+  if (!personFound) {
+    return res.status(404).end();
+  }
+
+  res.json(personFound);
+});
+
+app.delete("/api/persons/:id", (req: Request, res: Response) => {
+  const id = req.params.id;
+  console.log(`GET persons:id=${id}`);
+
+  let newPersons = persons.filter((person) => person.id !== id);
+
+  if (newPersons.length === persons.length) {
+    return res.status(404).end();
+  } else {
+    persons = newPersons;
+    res.status(204).end();
+  }
 });
 
 app.get("/info", (req: Request, res: Response) => {
