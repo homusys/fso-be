@@ -73,9 +73,38 @@ app.delete("/api/persons/:id", (req: Request, res: Response) => {
 app.post("/api/persons", (req: Request, res: Response) => {
   const p = req.body;
 
+  const name = p.name;
+  const number = p.number;
+
+  if (!name || !number) {
+    return res.status(422).send("The name or number fields are required!");
+  }
+
+  let nameOrNumber: "name" | "number" | null = null;
+
+  if (
+    persons.find((person) => {
+      if (person.name === name) {
+        nameOrNumber = "name";
+        return true;
+      }
+
+      if (person.number === number) {
+        nameOrNumber = "number";
+        return true;
+      }
+
+      return undefined;
+    })
+  ) {
+    return res
+      .status(422)
+      .send(`The ${nameOrNumber ?? "%%"} already exists on the database!`);
+  }
+
   const newPersonRecord = {
-    name: p.name,
-    number: p.number,
+    name,
+    number,
   } as PersonRecord;
 
   let max = Math.max(...persons.map((p) => Number(p.id)));
