@@ -35,6 +35,14 @@ app.get("/api/persons", (req: Request, res: Response) => {
   res.status(200).json(persons);
 });
 
+app.get("/info", (req: Request, res: Response) => {
+  console.log("GET info");
+
+  res.send(
+    `<p>Phonebook has info for: ${persons.length} people.</p><p>${new Date(Date.now()).toUTCString()}</p>`,
+  );
+});
+
 app.listen(PORT, () => {
   console.log(`Server is listening on port:${PORT}`);
 });
