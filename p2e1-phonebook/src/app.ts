@@ -75,31 +75,20 @@ app.post("/api/persons", (req: Request, res: Response) => {
 
   const name = p.name;
   const number = p.number;
+  let message = { error: "" };
 
   if (!name || !number) {
-    return res.status(422).send("The name or number fields are required!");
+    message.error = "The name and number fields are required.";
+    return res.status(422).send(message);
   }
-
-  let nameOrNumber: "name" | "number" | null = null;
 
   if (
     persons.find((person) => {
-      if (person.name === name) {
-        nameOrNumber = "name";
-        return true;
-      }
-
-      if (person.number === number) {
-        nameOrNumber = "number";
-        return true;
-      }
-
-      return undefined;
+      return person.name === name || person.number === number;
     })
   ) {
-    return res
-      .status(422)
-      .send(`The ${nameOrNumber ?? "%%"} already exists on the database!`);
+    message.error = "Either name or number should be unique.";
+    return res.status(422).send(message);
   }
 
   const newPersonRecord = {
