@@ -3,7 +3,22 @@ import express, { type Express, type Request, type Response } from "express";
 const PORT = 3001;
 
 const app: Express = express();
+
+// Sample middleware
+const requestLogger = (
+  request: Request,
+  response: Response,
+  next: VoidFunction,
+) => {
+  console.log("Method:", request.method);
+  console.log("Path:", request.path);
+  console.log("Body:", request.body);
+  response.set("X-Custom-Message", "Hello from RequestLogger");
+  next();
+};
+
 app.use(express.json());
+app.use(requestLogger);
 
 type PersonRecord = {
   id: string;
