@@ -1,24 +1,7 @@
 import express, { type Express, type Request, type Response } from "express";
+import morgan from "morgan";
 
 const PORT = 3001;
-
-const app: Express = express();
-
-// Sample middleware
-const requestLogger = (
-  request: Request,
-  response: Response,
-  next: VoidFunction,
-) => {
-  console.log("Method:", request.method);
-  console.log("Path:", request.path);
-  console.log("Body:", request.body);
-  response.set("X-Custom-Message", "Hello from RequestLogger");
-  next();
-};
-
-app.use(express.json());
-app.use(requestLogger);
 
 type PersonRecord = {
   id: string;
@@ -49,18 +32,44 @@ let persons = [
   },
 ] as PersonRecord[];
 
+const app: Express = express();
+
+// Sample middleware
+const requestLogger = (
+  request: Request,
+  response: Response,
+  next: VoidFunction,
+) => {
+  next();
+};
+
+// Use middleware
+app.use(express.json());
+app.use(
+  morgan((tokens, req: Request, res: Response) => {
+    return [
+      tokens.method(req, res),
+      tokens.url(req, res),
+      tokens.status(req, res),
+      tokens.res(req, res, "content-length"),
+      "-",
+      tokens["response-time"](req, res),
+      "ms",
+      req.method === "POST" ? JSON.stringify(req.body) : "",
+    ].join(" ");
+  }),
+);
+
 app.get("/", (req: Request, res: Response) => {
   res.send("/");
 });
 
 app.get("/api/persons", (req: Request, res: Response) => {
-  console.log("GET persons");
   res.status(200).json(persons);
 });
 
 app.get("/api/persons/:id", (req: Request, res: Response) => {
   const id = req.params.id;
-  console.log(`GET persons:id=${id}`);
 
   const personFound = persons.find((person) => person.id === id);
 
@@ -73,7 +82,6 @@ app.get("/api/persons/:id", (req: Request, res: Response) => {
 
 app.delete("/api/persons/:id", (req: Request, res: Response) => {
   const id = req.params.id;
-  console.log(`GET persons:id=${id}`);
 
   let newPersons = persons.filter((person) => person.id !== id);
 
@@ -115,13 +123,10 @@ app.post("/api/persons", (req: Request, res: Response) => {
   newPersonRecord.id = String(++max);
   persons.push(newPersonRecord);
 
-  console.log(persons);
   res.status(201).end();
 });
 
 app.get("/info", (req: Request, res: Response) => {
-  console.log("GET info");
-
   res.send(
     `<p>Phonebook has info for: ${persons.length} people.</p><p>${new Date(Date.now()).toUTCString()}</p>`,
   );
