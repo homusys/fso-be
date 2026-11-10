@@ -1,7 +1,7 @@
 import express, { type Express, type Request, type Response } from "express";
 import morgan from "morgan";
 
-const PORT = 3001;
+const PORT = 3000;
 
 type PersonRecord = {
   id: string;
@@ -68,7 +68,7 @@ app.get("/api/persons", (req: Request, res: Response) => {
   res.status(200).json(persons);
 });
 
-app.get("/api/persons/:id", (req: Request, res: Response) => {
+app.get("/api/persons/:id", (req: Request<{ id: string }>, res: Response) => {
   const id = req.params.id;
 
   const personFound = persons.find((person) => person.id === id);
@@ -80,18 +80,21 @@ app.get("/api/persons/:id", (req: Request, res: Response) => {
   res.json(personFound);
 });
 
-app.delete("/api/persons/:id", (req: Request, res: Response) => {
-  const id = req.params.id;
+app.delete(
+  "/api/persons/:id",
+  (req: Request<{ id: string }>, res: Response) => {
+    const id = req.params.id;
 
-  let newPersons = persons.filter((person) => person.id !== id);
+    let newPersons = persons.filter((person) => person.id !== id);
 
-  if (newPersons.length === persons.length) {
-    return res.status(404).end();
-  } else {
-    persons = newPersons;
-    res.status(204).end();
-  }
-});
+    if (newPersons.length === persons.length) {
+      return res.status(404).end();
+    } else {
+      persons = newPersons;
+      res.status(204).end();
+    }
+  },
+);
 
 app.post("/api/persons", (req: Request, res: Response) => {
   const p = req.body;
