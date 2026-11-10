@@ -1,5 +1,6 @@
 import express, { type Express, type Request, type Response } from "express";
 import morgan from "morgan";
+import cors from "cors";
 
 const PORT = 3000;
 
@@ -59,6 +60,7 @@ app.use(
     ].join(" ");
   }),
 );
+app.use(cors());
 
 app.get("/", (req: Request, res: Response) => {
   res.send("/");
@@ -126,7 +128,7 @@ app.post("/api/persons", (req: Request, res: Response) => {
   newPersonRecord.id = String(++max);
   persons.push(newPersonRecord);
 
-  res.status(201).end();
+  res.status(201).send(newPersonRecord);
 });
 
 app.get("/info", (req: Request, res: Response) => {
